@@ -8,10 +8,12 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  UnauthorizedException,
   Query,
   Put,
   Res,
   HttpStatus,
+  HttpException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -25,7 +27,6 @@ import type { Response as ExpressResponse } from 'express';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  // --- POST /user ---
   @Post('user')
   @UseInterceptors(
     FileInterceptor('avatar', {
@@ -41,7 +42,10 @@ export class UsersController {
       }),
       fileFilter: (req, file, cb) => {
         if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
-          return cb(new Error('Only jpg/png files are allowed!'), false);
+          return cb(
+            new UnauthorizedException('Only jpg/png files are allowed!'),
+            false,
+          );
         }
         cb(null, true);
       },
@@ -55,41 +59,26 @@ export class UsersController {
     if (!file) {
       throw new BadRequestException('Avatar file is required!');
     }
+
+    if (createUserDto.age < 1 || createUserDto.age > 100) {
+      throw new UnauthorizedException('Age must be between 1 and 100');
+    }
+
     try {
       const user = await this.usersService.create(createUserDto, file);
       return res.status(HttpStatus.CREATED).json(user);
     } catch (error) {
-      if (error.message.includes('INVALID_AVATAR_TYPE')) {
+      if (error.message.includes('UNIQUE constraint failed')) {
         return res
           .status(HttpStatus.UNAUTHORIZED)
-          .json({ message: error.message });
+          .json({ message: 'Email already exists' });
       }
-
-      if (error.message.includes('AGE_OUT_OF_RANGE')) {
-        return res
-          .status(HttpStatus.UNAUTHORIZED)
-          .json({ message: error.message });
-      }
-
-      if (error.message.includes('EMAIL_INVALID')) {
-        return res
-          .status(HttpStatus.UNAUTHORIZED)
-          .json({ message: error.message });
-      }
-
-      if (error.message.includes('EMAIL_EXISTS')) {
-        return res
-          .status(HttpStatus.UNAUTHORIZED)
-          .json({ message: error.message });
-      }
-
       return res
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
         .json({ message: error.message });
     }
   }
 
-  // --- GET /users ---
   @Get('users')
   async findAll(
     @Query('limit') limit: number = 10,
@@ -115,7 +104,6 @@ export class UsersController {
     }
   }
 
-  // --- PUT /user/:id ---
   @Put('user/:id')
   @UseInterceptors(
     FileInterceptor('avatar', {
@@ -132,7 +120,7 @@ export class UsersController {
       fileFilter: (req, file, cb) => {
         if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
           return cb(
-            new BadRequestException('Only jpg/png files are allowed!'),
+            new UnauthorizedException('Only jpg/png files are allowed!'),
             false,
           );
         }
@@ -159,23 +147,14 @@ export class UsersController {
           .status(HttpStatus.UNAUTHORIZED)
           .json({ message: error.message });
       }
-
-      if (error.message.includes('INVALID_AVATAR_TYPE')) {
-        return res
-          .status(HttpStatus.UNAUTHORIZED)
-          .json({ message: error.message });
-      }
-
       return res
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
         .json({ message: error.message });
     }
   }
 
-  // --- DELETE /user/:id ---
   @Delete('user/:id')
   async remove(@Param('id') id: string, @Res() res: ExpressResponse) {
-    // <--- ใช้ ExpressResponse
     try {
       await this.usersService.remove(id);
       return res.status(HttpStatus.OK).json({ success: true });

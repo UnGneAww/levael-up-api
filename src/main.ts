@@ -7,8 +7,8 @@ async function bootstrap() {
 
   app.useGlobalPipes(
     new ValidationPipe({
-      transform: true, // <-- ต้องเปิดอันนี้ เพื่อให้ @Type ทำงาน
-      whitelist: true, // ตัด field ขยะทิ้ง
+      transform: true,
+      whitelist: true,
     }),
   );
 

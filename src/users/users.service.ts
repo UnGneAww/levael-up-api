@@ -35,7 +35,7 @@ export class UsersService {
   async findAll(limit: number, page: number) {
     const skip = (page - 1) * limit;
     const [data, count] = await this.usersRepository.findAndCount({
-      order: { created_at: 'DESC' }, // เรียงจากใหม่ไปเก่า
+      order: { created_at: 'DESC' },
       take: limit,
       skip: skip,
     });
@@ -46,7 +46,7 @@ export class UsersService {
   async findOne(id: string): Promise<User> {
     const user = await this.usersRepository.findOneBy({ id });
     if (!user) {
-      throw new NotFoundException('User not found'); // ส่ง error ไปให้ Controller จัดการต่อ
+      throw new NotFoundException('User not found');
     }
     return user;
   }
@@ -56,7 +56,7 @@ export class UsersService {
     updateUserDto: UpdateUserDto,
     file?: Express.Multer.File,
   ): Promise<User> {
-    const user = await this.findOne(id); // เช็คก่อนว่ามี user ไหม
+    const user = await this.findOne(id);
 
     if (updateUserDto.name) user.name = updateUserDto.name;
     if (updateUserDto.age) {
@@ -70,7 +70,6 @@ export class UsersService {
       user.note = updateUserDto.note;
     }
 
-    // จัดการรูปภาพ (ถ้ามีการอัปโหลดใหม่)
     if (file) {
       try {
         fs.unlinkSync(`./uploads/${user.avatar_name}`);
@@ -85,7 +84,6 @@ export class UsersService {
 
   async remove(id: string): Promise<void> {
     const user = await this.findOne(id);
-    // ลบไฟล์รูปด้วย
     try {
       fs.unlinkSync(`./uploads/${user.avatar_name}`);
     } catch (err) {}
