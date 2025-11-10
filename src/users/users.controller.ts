@@ -41,10 +41,7 @@ export class UsersController {
       }),
       fileFilter: (req, file, cb) => {
         if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
-          return cb(
-            new BadRequestException('Only jpg/png files are allowed!'),
-            false,
-          );
+          return cb(new Error('Only jpg/png files are allowed!'), false);
         }
         cb(null, true);
       },
@@ -58,16 +55,34 @@ export class UsersController {
     if (!file) {
       throw new BadRequestException('Avatar file is required!');
     }
-
     try {
       const user = await this.usersService.create(createUserDto, file);
       return res.status(HttpStatus.CREATED).json(user);
     } catch (error) {
-      if (error.message.includes('UNIQUE constraint failed')) {
+      if (error.message.includes('INVALID_AVATAR_TYPE')) {
         return res
           .status(HttpStatus.UNAUTHORIZED)
-          .json({ message: 'Email already exists' });
+          .json({ message: error.message });
       }
+
+      if (error.message.includes('AGE_OUT_OF_RANGE')) {
+        return res
+          .status(HttpStatus.UNAUTHORIZED)
+          .json({ message: error.message });
+      }
+
+      if (error.message.includes('EMAIL_INVALID')) {
+        return res
+          .status(HttpStatus.UNAUTHORIZED)
+          .json({ message: error.message });
+      }
+
+      if (error.message.includes('EMAIL_EXISTS')) {
+        return res
+          .status(HttpStatus.UNAUTHORIZED)
+          .json({ message: error.message });
+      }
+
       return res
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
         .json({ message: error.message });
@@ -144,6 +159,13 @@ export class UsersController {
           .status(HttpStatus.UNAUTHORIZED)
           .json({ message: error.message });
       }
+
+      if (error.message.includes('INVALID_AVATAR_TYPE')) {
+        return res
+          .status(HttpStatus.UNAUTHORIZED)
+          .json({ message: error.message });
+      }
+
       return res
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
         .json({ message: error.message });
