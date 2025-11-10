@@ -21,12 +21,12 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 import type { Response as ExpressResponse } from 'express';
 
-@Controller('user')
+@Controller('')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   // --- POST /user ---
-  @Post()
+  @Post('user')
   @UseInterceptors(
     FileInterceptor('avatar', {
       storage: diskStorage({
@@ -75,7 +75,7 @@ export class UsersController {
   }
 
   // --- GET /users ---
-  @Get('../users')
+  @Get('users')
   async findAll(
     @Query('limit') limit: number = 10,
     @Query('page') page: number = 1,
@@ -83,7 +83,7 @@ export class UsersController {
     return this.usersService.findAll(+limit, +page);
   }
 
-  @Get(':id')
+  @Get('user/:id')
   async findOne(@Param('id') id: string, @Res() res: ExpressResponse) {
     try {
       const user = await this.usersService.findOne(id);
@@ -101,7 +101,7 @@ export class UsersController {
   }
 
   // --- PUT /user/:id ---
-  @Put(':id')
+  @Put('user/:id')
   @UseInterceptors(
     FileInterceptor('avatar', {
       storage: diskStorage({
@@ -151,7 +151,7 @@ export class UsersController {
   }
 
   // --- DELETE /user/:id ---
-  @Delete(':id')
+  @Delete('user/:id')
   async remove(@Param('id') id: string, @Res() res: ExpressResponse) {
     // <--- ใช้ ExpressResponse
     try {
