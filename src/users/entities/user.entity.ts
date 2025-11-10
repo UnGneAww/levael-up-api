@@ -4,11 +4,11 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
-} from "typeorm";
+} from 'typeorm';
 
 @Entity()
 export class User {
-  @PrimaryGeneratedColumn("Uid") // ใช้ UUID แทน ObjectId ของ Mongo
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column()
@@ -23,8 +23,11 @@ export class User {
   @Column()
   age: number;
 
-  @Column({ nullable: true })
-  note: string;
+  @Column()
+  year_of_birth: number;
+
+  @Column({ type: 'text', nullable: true })
+  note: string | null;
 
   @Column({ unique: true })
   email: string;
