@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
-import * as fs from 'fs'; // สำหรับลบไฟล์รูปเก่า
+import * as fs from 'fs';
 
 @Injectable()
 export class UsersService {
