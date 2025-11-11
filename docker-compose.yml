@@ -1,0 +1,41 @@
+
+services:
+  # 1. Service ของ NestJS API
+  api:
+    build: .
+    container_name: level-up-api
+    ports:
+      # ใช้ PORT จาก .env, ถ้าไม่มีให้ใช้ 3000
+      - "${PORT:-3000}:${PORT:-3000}"
+    volumes:
+      # เราไม่ map levelup.db แล้ว แต่ยัง map uploads อยู่
+      - ./uploads:/app/uploads
+    # สั่งให้โหลด .env ไฟล์นี้เข้าไปใน container
+    env_file:
+      - .env
+    # สั่งให้รอจนกว่า service 'db' จะพร้อมใช้งานก่อน
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  # 2. Service ของ PostgreSQL Database (เพิ่มใหม่)
+  db:
+    image: postgres:15-alpine # ใช้ PostgreSQL เวอร์ชัน 15
+    container_name: postgres_db
+    environment:
+      # ตั้งค่า Database ให้ตรงกับไฟล์ .env
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      # สร้าง volume ชื่อ postgres_data เพื่อเก็บข้อมูลถาวร (จะได้ไม่หายเวลาปิด)
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      # เชื่อมพอร์ต 5433 ของเครื่องเรา ไปยัง 5432 ใน container
+      # (เผื่ออยากใช้โปรแกรมข้างนอกต่อเข้าไปดู DB)
+      - "5433:5432"
+    restart: unless-stopped
+
+# 3. กำหนด Volume ที่จะใช้เก็บข้อมูล DB
+volumes:
+  postgres_data:

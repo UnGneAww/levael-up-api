@@ -1,0 +1,25 @@
+{
+  // บอกว่าให้ใช้ docker-compose.yml ที่อยู่ข้างนอก 1 ชั้น
+  "dockerComposeFile": "../docker-compose.yml",
+
+  // บอกว่าให้เข้าไปใน service ชื่อ 'api'
+  "service": "api",
+
+  // บอกว่าเมื่อเข้าไปแล้ว ให้เปิดโฟลเดอร์ /app เป็นหลัก
+  "workspaceFolder": "/app",
+
+  // สั่งให้รัน 'npm install' หลังจากสร้าง container เสร็จ
+  // (เพื่อให้ devDependencies อย่าง Nest CLI ติดตั้งใน container)
+  "postCreateCommand": "npm install",
+
+  // (Optional) สั่งให้ VS Code ลง Extension เหล่านี้ใน Container ด้วย
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "esbenp.prettier-vscode",
+        "ms-azuretools.vscode-docker",
+        "ms-vscode.vscode-postgresql"
+      ]
+    }
+  }
+}

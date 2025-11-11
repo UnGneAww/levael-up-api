@@ -41,7 +41,7 @@ export class UsersController {
         },
       }),
       fileFilter: (req, file, cb) => {
-        if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+        if (!file.originalname.match(/\.(jpg|png)$/)) {
           return cb(
             new UnauthorizedException('Only jpg/png files are allowed!'),
             false,
@@ -118,7 +118,7 @@ export class UsersController {
         },
       }),
       fileFilter: (req, file, cb) => {
-        if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+        if (!file.originalname.match(/\.(jpg|png)$/)) {
           return cb(
             new UnauthorizedException('Only jpg/png files are allowed!'),
             false,
